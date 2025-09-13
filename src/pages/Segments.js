@@ -17,6 +17,11 @@ export default function Segments() {
   };
 
   const saveSegment = async () => {
+    if(!name)
+    {
+      alert("Enter Name")
+      return
+    }
     await api.post("/segments", { name, rules });
     setName("");
     setRules({ op: "AND", children: [] });
