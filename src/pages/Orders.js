@@ -24,7 +24,7 @@ export default function Orders() {
 
   const fetchCustomers = async () => {
     const res = await api.get("/customers");
-    setCustomers(res.data.customers || []);
+    setCustomers(res.data.data || []);
   };
 
   const addOrder = async (e) => {

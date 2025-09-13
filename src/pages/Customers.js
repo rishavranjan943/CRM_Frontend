@@ -14,18 +14,30 @@ export default function Customers() {
   const [total, setTotal] = useState(0);
 
   const fetchCustomers = async () => {
-    const res = await api.get("/customers", {
-      params: { page: page + 1, limit: rowsPerPage, search },
-    });
-    setCustomers(res.data?.data || []);
-    setTotal(res.data?.total || 0);
+    try {
+      const res = await api.get("/customers", {
+        params: { page: page + 1, limit: rowsPerPage, search },
+      });
+      setCustomers(res.data?.data || []);
+      setTotal(res.data?.total || 0);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to fetch customers");
+    }
   };
 
   const addCustomer = async (e) => {
     e.preventDefault();
-    await api.post("/customers", form);
-    setForm({ name: "", email: "", phone: "" });
-    fetchCustomers();
+    try {
+      await api.post("/customers", form);
+      setForm({ name: "", email: "", phone: "" });
+      fetchCustomers();
+      alert("Customer added successfully");
+    } catch (err) {
+      console.error(err);
+      const msg = err.response?.data?.error || "Failed to add customer";
+      alert(`${msg}`);
+    }
   };
 
   useEffect(() => {
