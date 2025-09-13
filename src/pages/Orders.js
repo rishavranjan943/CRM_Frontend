@@ -88,13 +88,14 @@ export default function Orders() {
         <Table>
           <TableHead>
             <TableRow>
-              {["Customer","Amount","Date"].map(h => <TableCell key={h}>{h}</TableCell>)}
+              {["CustomerID","OrderID","Amount","Date"].map(h => <TableCell key={h}>{h}</TableCell>)}
             </TableRow>
           </TableHead>
           <TableBody>
             {orders.map(o => (
               <TableRow key={o._id}>
-                <TableCell>{o.customer?.name || o.customer_id}</TableCell>
+                <TableCell>{o.customer_id}</TableCell>
+                <TableCell>{o.order_id}</TableCell>
                 <TableCell>₹{o.amount}</TableCell>
                 <TableCell>{new Date(o.created_at).toLocaleString()}</TableCell>
               </TableRow>
