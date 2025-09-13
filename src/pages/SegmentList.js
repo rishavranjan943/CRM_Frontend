@@ -3,18 +3,25 @@ import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import {
   Container, Typography, Button, Paper, Table, TableHead, TableRow,
-  TableCell, TableBody, Stack
+  TableCell, TableBody, Stack, TextField, TablePagination
 } from "@mui/material";
 
 export default function SegmentList() {
   const [segments, setSegments] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [total, setTotal] = useState(0);
   const navigate = useNavigate();
 
   const fetchSegments = async () => {
-    const res = await api.get("/segments");
-    setSegments(res.data.segments || []);
+    const res = await api.get("/segments", {
+      params: { page: page + 1, limit: rowsPerPage, search },
+    });
+    setSegments(res.data?.segments || []);
+    setTotal(res.data?.total || 0);
   };
 
   const viewCustomers = async (id) => {
@@ -34,11 +41,26 @@ export default function SegmentList() {
     navigate("/segments");
   };
 
-  useEffect(() => { fetchSegments(); }, []);
+  useEffect(() => { fetchSegments(); }, [page, rowsPerPage]);
+
+  const handleSearch = () => {
+    setPage(0);
+    fetchSegments();
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h4" mb={3}>Saved Segments</Typography>
+
+      <Stack direction="row" spacing={2} mb={2}>
+        <TextField
+          placeholder="Search by name"
+          size="small"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <Button variant="outlined" onClick={handleSearch}>Search</Button>
+      </Stack>
 
       <Paper sx={{ mb: 4 }}>
         <Table>
@@ -67,6 +89,18 @@ export default function SegmentList() {
             ))}
           </TableBody>
         </Table>
+
+        <TablePagination
+          component="div"
+          count={total}
+          page={page}
+          onPageChange={(e, newPage) => setPage(newPage)}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+        />
       </Paper>
 
       {selected && (

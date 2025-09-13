@@ -1,17 +1,24 @@
 import React, { useEffect, useState } from "react";
 import api from "../api/axios";
 import {
-  Container, Typography, TextField, Button,
-  Table, TableBody, TableCell, TableHead, TableRow, Paper, Stack
+  Container, Typography, TextField, Button, Table, TableBody,
+  TableCell, TableHead, TableRow, Paper, Stack, TablePagination
 } from "@mui/material";
 
 export default function Customers() {
   const [customers, setCustomers] = useState([]);
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [total, setTotal] = useState(0);
 
   const fetchCustomers = async () => {
-    const res = await api.get("/customers");
-    setCustomers(res.data?.customers || res.data || []);
+    const res = await api.get("/customers", {
+      params: { page: page + 1, limit: rowsPerPage, search },
+    });
+    setCustomers(res.data?.data || []);
+    setTotal(res.data?.total || 0);
   };
 
   const addCustomer = async (e) => {
@@ -21,7 +28,14 @@ export default function Customers() {
     fetchCustomers();
   };
 
-  useEffect(() => { fetchCustomers(); }, []);
+  useEffect(() => {
+    fetchCustomers();
+  }, [page, rowsPerPage]);
+
+  const handleSearch = () => {
+    setPage(0);
+    fetchCustomers();
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -40,6 +54,16 @@ export default function Customers() {
           </Stack>
         </form>
       </Paper>
+
+      <Stack direction="row" spacing={2} mb={2}>
+        <TextField
+          placeholder="Search by name or email"
+          size="small"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <Button variant="outlined" onClick={handleSearch}>Search</Button>
+      </Stack>
 
       <Paper>
         <Table>
@@ -63,6 +87,18 @@ export default function Customers() {
             ))}
           </TableBody>
         </Table>
+
+        <TablePagination
+          component="div"
+          count={total}
+          page={page}
+          onPageChange={(e, newPage) => setPage(newPage)}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+        />
       </Paper>
     </Container>
   );
